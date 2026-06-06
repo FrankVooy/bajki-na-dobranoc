@@ -1,1 +1,261 @@
+cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bajki na Dobranoc 🌙</title>
+<link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg1:#0d0d2b;--bg2:#2d1b6b;--moon:#f9e4a0;--cloud:#c8a8f0;--text:#f0e8ff;--card:rgba(255,255,255,0.07);--border:rgba(200,168,240,0.25);--accent:#b388ff;--pink:#f48fb1;--green:#80cbc4;--purple:#7c4dff;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Nunito',sans-serif;background:radial-gradient(ellipse at 60% 10%,var(--bg2) 0%,var(--bg1) 60%,#1a0a3e 100%);min-height:100vh;color:var(--text);overflow-x:hidden;}
+  .stars{position:fixed;inset:0;pointer-events:none;z-index:0;}
+  .star{position:absolute;border-radius:50%;background:white;animation:tw var(--d) ease-in-out infinite;}
+  @keyframes tw{0%,100%{opacity:.15}50%{opacity:1}}
+  .moon{position:fixed;top:16px;right:20px;width:52px;height:52px;z-index:1;background:radial-gradient(circle at 35% 35%,#fffde7,#f9e4a0 60%,#e6c84a);border-radius:50%;box-shadow:0 0 28px 8px rgba(249,228,160,.2);animation:mf 6s ease-in-out infinite;}
+  @keyframes mf{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  .container{position:relative;z-index:2;max-width:600px;margin:0 auto;padding:14px 13px 80px;}
+  header{text-align:center;padding:28px 0 18px;}
+  header h1{font-family:'Bubblegum Sans',cursive;font-size:clamp(1.7rem,7vw,2.8rem);background:linear-gradient(135deg,#f9e4a0,#b388ff,#f48fb1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 8px rgba(179,136,255,.35));margin-bottom:5px;}
+  header p{color:var(--cloud);font-size:.85rem;opacity:.8;}
+  #player{background:rgba(255,255,255,.05);border:1.5px solid var(--border);border-radius:22px;padding:18px 15px;margin-bottom:18px;display:none;backdrop-filter:blur(8px);animation:su .35s cubic-bezier(.34,1.56,.64,1);}
+  #player.visible{display:block;}
+  @keyframes su{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .ptop{display:flex;align-items:center;gap:11px;margin-bottom:13px;}
+  .pem{font-size:2.2rem;}
+  .pinfo h2{font-family:'Bubblegum Sans',cursive;font-size:1.1rem;color:var(--moon);line-height:1.2;}
+  .pinfo p{color:var(--cloud);font-size:.75rem;opacity:.8;margin-top:2px;}
+  .sbar{background:rgba(0,0,0,.25);border-radius:10px;padding:9px 12px;font-size:.78rem;color:var(--cloud);margin-bottom:12px;display:flex;align-items:center;gap:8px;min-height:38px;}
+  .sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#546e7a;transition:background .3s;}
+  .sdot.loading{background:var(--moon);animation:pu .8s ease-in-out infinite;}
+  .sdot.playing{background:var(--green);animation:pu .8s ease-in-out infinite;}
+  .sdot.paused{background:var(--pink);}
+  .sdot.ready{background:var(--accent);}
+  .sdot.error{background:#ef5350;}
+  @keyframes pu{0%,100%{opacity:.3}50%{opacity:1}}
+  .prog-bg{height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:5px;}
+  .prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--purple),var(--pink));width:0%;transition:width .4s;}
+  .prog-labels{display:flex;justify-content:space-between;font-size:.7rem;color:var(--cloud);opacity:.65;margin-bottom:12px;}
+  .controls{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+  .btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:13px 18px;border-radius:50px;border:none;font-family:'Bubblegum Sans',cursive;font-size:.95rem;cursor:pointer;color:white;touch-action:manipulation;transition:transform .15s;user-select:none;}
+  .btn:active{transform:scale(.93);}
+  .btn-play{background:linear-gradient(135deg,#7c4dff,#9c27b0);box-shadow:0 3px 14px rgba(124,77,255,.4);flex:1;}
+  .btn-pause{background:linear-gradient(135deg,#f06292,#e91e63);flex:1;display:none;}
+  .btn-stop{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);padding:13px 14px;}
+  .stxt-wrap{background:rgba(0,0,0,.2);border-radius:13px;padding:13px;max-height:200px;overflow-y:auto;}
+  .stxt{font-size:.87rem;line-height:1.85;color:rgba(240,232,255,.85);}
+  .hl{background:rgba(124,77,255,.35);border-radius:3px;padding:1px 2px;}
+  .ztip{font-size:.7rem;color:rgba(200,168,240,.4);text-align:center;margin-top:8px;}
+  .sgrid{display:flex;flex-direction:column;gap:11px;}
+  .scard{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:13px;touch-action:manipulation;user-select:none;}
+  .scard:active{transform:scale(.97);}
+  .scard.active{border-color:var(--pink);box-shadow:0 0 0 2px rgba(244,143,177,.25);}
+  .sem{font-size:2.2rem;flex-shrink:0;}
+  .sbody{flex:1;min-width:0;}
+  .stitle{font-family:'Bubblegum Sans',cursive;font-size:.98rem;color:var(--moon);margin-bottom:4px;}
+  .smeta{display:flex;gap:5px;flex-wrap:wrap;}
+  .badge{font-size:.62rem;padding:2px 7px;border-radius:50px;font-weight:700;text-transform:uppercase;}
+  .bt{background:rgba(128,203,196,.2);color:#80cbc4;border:1px solid rgba(128,203,196,.3);}
+  .ba{background:rgba(179,136,255,.2);color:#b388ff;border:1px solid rgba(179,136,255,.3);}
+  footer{text-align:center;padding:14px;color:rgba(200,168,240,.3);font-size:.7rem;}
+  #audio-el{display:none;}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="moon"></div>
+<div class="container">
+  <header>
+    <h1>🌙 Bajki na Dobranoc</h1>
+    <p>Słodkich snów, mały słuchaczu ✨</p>
+  </header>
 
+  <div id="player">
+    <div class="ptop">
+      <span class="pem" id="pem">🌟</span>
+      <div class="pinfo">
+        <h2 id="ptitle">Tytuł</h2>
+        <p id="pmeta">ok. 15 min</p>
+      </div>
+    </div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span id="smsg">Naciśnij ▶ Czytaj</span></div>
+    <div class="prog-bg"><div class="prog-fill" id="pfill"></div></div>
+    <div class="prog-labels"><span id="plbl">0 z 0</span><span id="ppct">0%</span></div>
+    <div class="controls">
+      <button class="btn btn-play"  id="bplay"  onclick="play()">▶ Czytaj</button>
+      <button class="btn btn-pause" id="bpause" onclick="pauseAudio()">⏸ Pauza</button>
+      <button class="btn btn-stop"  onclick="stopAll()">⏹</button>
+    </div>
+    <audio id="audio-el"></audio>
+    <div class="stxt-wrap"><div class="stxt" id="stxt"></div></div>
+    <div class="ztip">zzz… bajka trwa ok. <span id="dlbl">15</span> minut</div>
+  </div>
+
+  <div class="sgrid" id="sgrid"></div>
+</div>
+<footer>🌙 Bajki na Dobranoc · Dobrej nocy!</footer>
+
+<script>
+const STORIES=[
+  {id:1,em:'🐻',title:'Miś Puszek i Zaczarowany Las',age:'3–6',dur:'~15 min',min:15,
+  text:`Dawno, dawno temu, na skraju wielkiego zielonego lasu, w przytulnej norce pod starym dębem, mieszkał mały miś o imieniu Puszek. Puszek miał brązowe, miękkie futro i okrągły różowy nosek, który nieustannie węszył w poszukiwaniu słodkiego miodu. Pewnego wieczoru, kiedy słońce chowało się za górami i niebo zabarwiło się na kolor pomarańczowej marmolady, Puszek postanowił wybrać się na spacer. Włożył swój ulubiony czerwony szalik w białe groszki i wyszedł przed drzwi. Dzisiejszej nocy las wygląda inaczej, mruknął do siebie. I rzeczywiście. Drzewa lśniły srebrzystym blaskiem, jakby ktoś posypał je gwiazdkowym pyłem. Liście szeptały cicho, a spod każdego kamyczka wyglądały małe błyszczące świetliki. Chodź z nami, zawołał świetlik. Pokażemy ci coś wyjątkowego! Puszek podążył za chmarą migotliwych świateł głębiej w las. Po drodze minął wiewiórkę Różę, która zbierała złote żołędzie. Wiewiórka rzuciła koszyczek i pobiegła razem z nim. Wkrótce dołączył jeż Kolczatek i żabka Krosna. Razem dotarli do Polany Snów. Pośrodku stało ogromne stare drzewo, Drzewo Marzeń. Jego gałęzie sięgały gwiazd, a na każdej wisiały kolorowe bańki mydlane. W środku każdej bańki widać było małą scenę jak w śnieżnej kuli. To są marzenia wszystkich leśnych mieszkańców, wyjaśnił świetlik. Puszek zobaczył bańkę ze swoim własnym marzeniem. W środku był wielki słój złocistego miodu, stół z pysznym ciastem i wszyscy jego przyjaciele. To jest twoje marzenie, Puszku. Być szczęśliwym razem z tymi, których kochasz. Miś poczuł jak robi mu się ciepło w środku. Siedzieli razem na polanie aż gwiazdy zaczęły bladnąć. Czas wracać do domu, powiedział Puszek cicho. Trzeba się wyspać, żeby marzenia mogły się spełniać. Puszek zatulił się w szalik, zamknął oczy i zasnął z uśmiechem. Dobranoc, Puszku. Dobranoc.`},
+  {id:2,em:'🌟',title:'Gwiezdna Zosia i Srebrny Statek',age:'4–8',dur:'~18 min',min:18,
+  text:`Za siedmioma górami i siedmioma morzami mieszkała mała dziewczynka o imieniu Zosia. Zosia miała jasne kręcone włosy koloru miodu i niebieskie oczy, w których zawsze odbijały się gwiazdy. Każdej nocy siadała na parapecie okna i wpatrywała się w niebo. Jej ulubioną gwiazdą była Jasna, najjaśniejsza na niebie. Pewnej nocy Zosia usłyszała cichy melodyjny dźwięk, jak dzwoneczki z mrożonego powietrza. Wyjrzała przez okno i zobaczyła na zaśnieżonym ogrodzie statek zbudowany z księżycowego srebra. Przy trapie stał chłopiec w niebieskim płaszczu usianym gwiazdkami. Jesteś Zosią, zapytał. Jasna cię wysyła. Mam dla ciebie list. Zosia naciągnęła buty i wyszła na śnieg. Droga Zosiu, masz dobrą duszę i mądre serce. Na Srebrnym Statku płyniemy przez gwiezdne morze do miejsca, gdzie spełniają się marzenia. Zosia weszła na statek. W środku było ciepło jak przy kominku. Babulindia tka nowe gwiazdy dla tych które gasną. Statek uniósł się cicho w powietrze. Płynęli przez gwiezdne morze, mijali planety pokryte kryształowym lodem. Po długiej podróży dotarli do Wyspy Marzeń. Jasna czekała na Zosię. Zosiu, przyniosłam cię tu, żebyś zobaczyła coś ważnego. Z góry widać było całą Ziemię, niebieską, okrągłą, piękną jak klejnot. Każde światełko które widzisz, to czyjś dom. Czyjś ogień przy którym ktoś siedzi i kocha. Nigdy nie jesteś sama. Zosia wróciła do domu i zasnęła spokojnie. Dobranoc. Gwiazdy nad tobą czuwają.`},
+  {id:3,em:'🐉',title:'Smok Fiutek i Rycerz Bez Zbroi',age:'4–8',dur:'~17 min',min:17,
+  text:`W Królestwie Zielonych Wzgórz, w jaskini wyłożonej miękkim mchem, mieszkał mały smok imieniem Fiutek. Był to smok wyjątkowy, bo Fiutek bał się ognia. Inne smoki śmiały się z niego. Fiutek nie odpowiadał. Szedł do domu i czytał książki o botanice. Pewnego dnia przyszedł do niego chłopiec w za dużej kurtce i gumowych butach z kaczuszkami. Miał na imię Tomek. Szukam smoka który mi pomoże. Moja siostra Marysia zgubiła lalkę w Mrocznym Lesie. Fiutek wiedział o Mrocznym Lesie gdzie złe cienie szeptały straszne rzeczy. Dobrze, powiedział smok. Chodźmy. W Mrocznym Lesie cienie szeptały: Wróć. Twój ogień jest za słaby. Jesteś śmieszny. Tomek wziął smoka za łapę. Nie słuchaj, powiedział cicho. Cienie kłamią. Fiutek spojrzał na małą dłoń chłopca na swojej wielkiej zielonej łapie. I dmuchnął spokojnym ciepłym światłem. Jak wielka świeca. Las rozjaśnił się. Cienie cofnęły się. Razem znaleźli lalkę. Marysia powiedziała: Dziękuję, panie smoku. Masz piękny ogień. To nie jest ten smok który pali zamki. To jest ten smok który rozświetla mrok. Dobranoc.`},
+  {id:4,em:'🌊',title:'Syrenka Perła i Tajemnica Głębin',age:'5–9',dur:'~20 min',min:20,
+  text:`Pod wodami spokojnego ciepłego morza, w Podwodnym Mieście Koralin, żyła mała syrenka imieniem Perła. Miała ciemnobłękitny ogon i oczy koloru głębokiego oceanu. Perła kochała muzykę i tajemnice. Pewnego ranka obudziła się na dźwięk głębokiej wibrującej muzyki. Muzyka dobiegała z Dna Mgły. Perła wzięła latarkę i popłynęła w dół. W sercu Dna Mgły stała wieża z drewna zatopionych okrętów. W oknie siedziała stara syrenka z siwymi włosami i oczami srebrnymi jak księżyc. To Ondyna, pierwsza syrenka która zamieszkała w tych wodach. Byłam dumna i niecierpliwa, powiedziała Ondyna. Odpłynęłam szukać czegoś lepszego. A gdy chciałam wrócić, nikt mnie nie pamiętał. Czy pani tęskni? Każdego dnia. Dlatego gram. Pójdę powiedzieć o pani moim przyjaciołom, powiedziała Perła. Cała procesja syrenek wpłynęła do Dna Mgły. Witaj w domu, powiedział ojciec Perły. Ondyna zagrała muzykę powrotu i brzmiała tak pięknie, że nawet ryby przystanęły słuchać. Gdy słyszysz muzykę smutku, nie uciekaj. Czasem ktoś potrzebuje żebyś przyszedł i zapytał: czy wszystko dobrze? Dobranoc. Ocean kołysze.`},
+  {id:5,em:'🦊',title:'Lis Rudy i Sekret Starego Młyna',age:'5–9',dur:'~16 min',min:16,
+  text:`Na wsi gdzie kończyły się sady jabłoniowe stał stary młyn. Wszyscy mówili że mieszka w nim duch. Tylko Rudy lis tak nie mówił. Wiedział że w pustych miejscach nie mieszkają duchy, mieszkają tajemnice. Pewnej nocy Rudy wszedł do młyna. W kącie paliło się małe palenisko. Przy nim siedział stary jeż. Jestem Fabian. Mieszkam tu od czterech lat. Nie mogę za dobrze chodzić, pokazał krzywą łapę. Rudy rozejrzał się. Zobaczył ogródek na parapecie, półkę z kamykami, rysunek na ścianie. Zrobiłeś to wszystko? Człowiek ma ręce żeby budować dom. Jeż też. Rozmawiali długo. Chciałbym kiedyś zobaczyć góry, powiedział Fabian cicho. Mam wózek, powiedział Rudy. Może cię udźwignie. Czemu miałbyś to zrobić? Bo samemu nie jest tak ciekawie jak we dwójkę. I bo góry też powinny zobaczyć dobrego jeża. Na wiosnę ze starego młyna wyjechał mały wózek ciągnięty przez rudego lisa. Na wózku siedział jeż z kolcami w słońcu. Jechali na wschód, gdzie zaczynają się góry. Dobranoc.`},
+  {id:6,em:'🧚',title:'Wróżka Mela i Skradziony Świt',age:'4–7',dur:'~15 min',min:15,
+  text:`W krainie gdzie każdy ranek zaczynał się od złotego świtu, żyła mała wróżka o imieniu Mela. Malowała każdego ranka kolorami brzask. Ale pewnego dnia pojemniki z farbami były puste. Ktoś skradł świt. Bez świtu słońce nie wiedziało kiedy wstać. Cały świat był szary i zmęczony. Mela poleciała do Doliny Nocy. Cień Nocy mieszkał w wieży z księżycowej skały. Oddaj świt! Zabrałem je bo byłem zazdrosny, powiedział Cień. Każdy kocha poranek. Nikt nie kocha nocy. A ja pracuję całą noc żeby gwiazdy świeciły. I nikt mi nigdy nie dziękuje. To prawda, przyznała Mela. Noc jest ważna. Jutro rano zostawię na niebie pasek ciemnofioletowy. Kolor twojej pracy. Żeby wszyscy widzieli że zanim przyszedł poranek, był piękny ważny cień. Cień Nocy uśmiechnął się. Dobrze, powiedział. Od tamtej pory możesz to zobaczyć każdego poranka tuż przed wschodem słońca. Ten ciemny piękny pasek to dzieło Cienia Nocy. Noc pracuje dla ciebie. Gwiazdy pilnują. Dobranoc.`}
+];
+
+let story=null, chunks=[], idx=0, playing=false, paused=false;
+const audioEl=document.getElementById('audio-el');
+audioEl.addEventListener('ended', onChunkEnd);
+
+window.addEventListener('DOMContentLoaded',()=>{
+  makeStars();
+  renderCards();
+});
+
+function makeStars(){
+  const c=document.getElementById('stars');
+  for(let i=0;i<100;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=Math.random()<.15?3:2;
+    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;--d:${2+Math.random()*4}s;animation-delay:${Math.random()*5}s;opacity:${.3+Math.random()*.7}`;
+    c.appendChild(s);
+  }
+}
+
+function renderCards(){
+  const g=document.getElementById('sgrid');
+  STORIES.forEach(st=>{
+    const d=document.createElement('div');
+    d.className='scard';d.id='c'+st.id;
+    d.innerHTML=`<span class="sem">${st.em}</span><div class="sbody"><div class="stitle">${st.title}</div><div class="smeta"><span class="badge bt">⏱ ${st.dur}</span><span class="badge ba">👶 ${st.age} lat</span></div></div>`;
+    d.addEventListener('click',()=>pick(st));
+    g.appendChild(d);
+  });
+}
+
+function pick(st){
+  stopAll();
+  story=st;
+  document.querySelectorAll('.scard').forEach(c=>c.classList.remove('active'));
+  document.getElementById('c'+st.id).classList.add('active');
+  document.getElementById('pem').textContent=st.em;
+  document.getElementById('ptitle').textContent=st.title;
+  document.getElementById('pmeta').textContent=`${st.dur} · wiek ${st.age} lat`;
+  document.getElementById('dlbl').textContent=st.min;
+  chunks=splitChunks(st.text,800);
+  idx=0;
+  renderText();
+  setProgress();
+  setStatus('ready','Naciśnij ▶ Czytaj!');
+  setBtns(false);
+  const p=document.getElementById('player');
+  p.classList.add('visible');
+  p.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function splitChunks(text,max){
+  const sents=text.split(/(?<=[.!?…])\s+/).filter(s=>s.trim());
+  const res=[];let cur='';
+  for(const s of sents){
+    if(cur.length+s.length>max&&cur.length>0){res.push(cur.trim());cur=s+' ';}
+    else cur+=s+' ';
+  }
+  if(cur.trim())res.push(cur.trim());
+  return res;
+}
+
+function renderText(){
+  document.getElementById('stxt').innerHTML=
+    chunks.map((s,i)=>`<span id="s${i}" class="${i===idx?'hl':''}">${s} </span>`).join('');
+}
+
+function setProgress(){
+  const pct=chunks.length?Math.round(idx/chunks.length*100):0;
+  document.getElementById('pfill').style.width=pct+'%';
+  document.getElementById('plbl').textContent=`Część ${Math.min(idx+1,chunks.length)} z ${chunks.length}`;
+  document.getElementById('ppct').textContent=pct+'%';
+}
+
+function setStatus(type,msg){
+  document.getElementById('sdot').className='sdot '+type;
+  document.getElementById('smsg').textContent=msg;
+}
+
+function setBtns(isPlaying){
+  document.getElementById('bplay').style.display=isPlaying?'none':'';
+  document.getElementById('bpause').style.display=isPlaying?'':'none';
+}
+
+async function play(){
+  if(!story)return;
+  if(paused){paused=false;audioEl.play();setStatus('playing','Czytam… 🌙');setBtns(true);return;}
+  playing=true;
+  await playChunk(idx);
+}
+
+async function playChunk(i){
+  if(i>=chunks.length){finish();return;}
+  idx=i;
+  document.querySelectorAll('#stxt span').forEach((el,j)=>el.className=j===i?'hl':'');
+  setProgress();
+  const el=document.getElementById('s'+i);
+  if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+  setStatus('loading',`Generuję audio ${i+1}/${chunks.length}… ⏳`);
+  setBtns(false);
+  try{
+    const res=await fetch('/tts',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:chunks[i]})
+    });
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||'Błąd serwera');}
+    if(!playing)return;
+    const blob=await res.blob();
+    audioEl.src=URL.createObjectURL(blob);
+    await audioEl.play();
+    setStatus('playing',`Czytam część ${i+1}/${chunks.length} 🌙`);
+    setBtns(true);
+  }catch(e){
+    setStatus('error',`Błąd: ${e.message}`);
+    setBtns(false);playing=false;
+  }
+}
+
+function onChunkEnd(){if(playing&&!paused)playChunk(idx+1);}
+
+function pauseAudio(){
+  if(audioEl&&!audioEl.paused){
+    audioEl.pause();paused=true;
+    setStatus('paused','Wstrzymano ⏸ — dotknij ▶ aby kontynuować');
+    setBtns(false);
+  }
+}
+
+function stopAll(){
+  playing=false;paused=false;
+  if(audioEl){audioEl.pause();audioEl.src='';}
+  idx=0;
+  if(story){renderText();setProgress();}
+  setStatus('ready','Zatrzymano. Dotknij ▶ Czytaj.');
+  setBtns(false);
+}
+
+function finish(){
+  playing=false;paused=false;
+  setStatus('ready','✨ Koniec bajki! Dobranoc 🌙');
+  setBtns(false);
+}
+</script>
+</body>
+</html>
+HTMLEOF
+echo "OK"
